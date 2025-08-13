@@ -98,6 +98,8 @@ The application will be available at `http://localhost:3000`
 
 ## Database Schema
 
+![Database Schema](./docs/schema-diagram.png)
+
 ### Tables
 - `books`: Stores book information (title, author, ISBN, quantity, location)
 - `borrowers`: Manages borrower details (name, email, registration date)
