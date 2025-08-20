@@ -1,8 +1,8 @@
-const Book = require('../models/bookModel');
-const db = require('../config/database');
+const Book = require('../src/models/bookModel');
+const db = require('../src/config/database');
 
 // Mock the database module
-jest.mock('../config/database');
+jest.mock('../src/config/database');
 
 describe('Book Model', () => {
     beforeEach(() => {

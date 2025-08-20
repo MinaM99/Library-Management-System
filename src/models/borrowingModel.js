@@ -48,7 +48,7 @@ class Borrowing {
             FROM borrowings bw
             JOIN books b ON bw.book_id = b.id
             JOIN borrowers br ON bw.borrower_id = br.id
-            WHERE bw.status = 'BORROWED'
+            WHERE bw.status = 'OVERDUE'
             AND bw.due_date < CURRENT_TIMESTAMP
             ORDER BY days_overdue DESC`
         );
@@ -68,7 +68,7 @@ class Borrowing {
             FROM borrowings bw
             JOIN books b ON bw.book_id = b.id
             WHERE bw.borrower_id = ?
-            AND bw.status = 'BORROWED'
+            AND bw.status = 'OVERDUE'
             AND bw.due_date < CURRENT_TIMESTAMP
             ORDER BY days_overdue DESC`,
             [borrowerId]
