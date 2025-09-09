@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "3000:3000"  # Expose backend directly
+      - "3000:3000"
     environment:
       - NODE_ENV=development
       - DB_HOST=db
@@ -16,27 +16,31 @@ services:
       - CORS_ORIGIN=http://localhost:3001
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
-    networks:
-      - library-network
 
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile.dev
     ports:
-      - "3001:3001"  # Frontend on different port
+      - "3001:3001"
     environment:
       - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - NEXT_WEBPACK_USEPOLLING=1
     restart: unless-stopped
+    depends_on:
+      - backend
     volumes:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
-      - /usr/src/app/.next
-    networks:
-      - library-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   db:
     image: mysql:8.0
@@ -49,13 +53,15 @@ services:
       - mysql_data:/var/lib/mysql
       - ./backend/src/config/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./backend/src/config/auth_schema.sql:/docker-entrypoint-initdb.d/02-auth-schema.sql
-    restart: unless-stopped
-    networks:
-      - library-network
-
-networks:
-  library-network:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
   mysql_data:
+
+networks:
+  default:
+    driver: bridge
