@@ -11,7 +11,6 @@ A comprehensive Library Management System built with Node.js and MySQL. Manage b
 - [API Documentation](#api-documentation)
 - [Database Schema](#database-schema)
 - [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
 - [Security Features](#security-features)
 
 ## Features
