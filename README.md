@@ -8,7 +8,7 @@ A full-stack web application for managing library operations including books, bo
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend       │    │   Database      │
 │   (Port 3001)   │◄──►│   (Port 3000)   │◄──►│   (Port 3306)   │
-│   Next.js/React │    │   Node.js/Express│    │   MySQL         │
+│   Next.js/React │    │  Node.js/Express│    │   MySQL         │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -113,18 +113,6 @@ docker-compose logs -f backend
 docker-compose logs -f frontend
 ```
 
-### Scaling Services
-
-**Scale Backend:**
-```bash
-docker-compose up --scale backend=2
-```
-
-**Scale Frontend:**
-```bash
-docker-compose up --scale frontend=2
-```
-
 ## 🔐 Environment Configuration
 
 The application uses a single environment file for simplicity:
@@ -199,25 +187,3 @@ docker-compose up --build
 3. **Test**: Access application at http://localhost:3001
 4. **Debug**: Use `docker-compose logs -f [service]` for debugging
 
-## 🏗️ Production Deployment
-
-The application is production-ready with:
-- ✅ Optimized Docker images
-- ✅ Environment-based configuration
-- ✅ Proper error handling
-- ✅ Security best practices
-- ✅ Independent service scaling
-
-## 📝 License
-
-This project is for educational/development purposes.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
----
