@@ -186,4 +186,3 @@ docker-compose up --build
 2. **Hot Reload**: Development containers automatically reload
 3. **Test**: Access application at http://localhost:3001
 4. **Debug**: Use `docker-compose logs -f [service]` for debugging
-
