@@ -10,14 +10,14 @@ interface User {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  isAuthenticated: boolean;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
-  token: null,
+  isAuthenticated: false,
   status: 'idle',
   error: null,
 };
@@ -27,10 +27,7 @@ export const login = createAsyncThunk(
   async (credentials: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/auth/login', credentials);
-      // Store the token in localStorage
-      if (response.data.token) {
-        localStorage.setItem('__clerk_db_jwt', response.data.token);
-      }
+      // No need to store token in localStorage - it's now in HTTP-only cookie
       return response.data;
     } catch (error: any) {
       // Handle different types of errors
@@ -45,12 +42,23 @@ export const login = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
-  // Remove token from localStorage
-  localStorage.removeItem('__clerk_db_jwt');
-  // Clear any stored user data or tokens
-  localStorage.clear();
+export const logout = createAsyncThunk('auth/logout', async () => {
+  // Call logout endpoint to clear HTTP-only cookie
+  await axiosInstance.post('/auth/logout');
   return null;
+});
+
+export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.get('/auth/me');
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      // Not authenticated - this is normal, not an error
+      return rejectWithValue('Not authenticated');
+    }
+    return rejectWithValue('Error checking authentication status');
+  }
 });
 
 const authSlice = createSlice({
@@ -60,16 +68,7 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    hydrateAuth: (state) => {
-      // Only run on client side
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('__clerk_db_jwt');
-        if (token) {
-          state.token = token;
-          state.status = 'succeeded';
-        }
-      }
-    },
+    // Remove hydrateAuth - no longer needed with HTTP-only cookies
   },
   extraReducers: (builder) => {
     builder
@@ -80,7 +79,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.isAuthenticated = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed';
@@ -94,11 +93,28 @@ const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
-        state.token = null;
+        state.isAuthenticated = false;
         state.status = 'idle';
+      })
+      .addCase(checkAuth.pending, (state) => {
+        if (state.status === 'idle') {
+          state.status = 'loading';
+        }
+      })
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(checkAuth.rejected, (state) => {
+        state.status = 'failed';
+        state.user = null;
+        state.isAuthenticated = false;
+        state.error = null; // Don't show error for failed auth check
       });
   },
 });
 
-export const { clearError, hydrateAuth } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;

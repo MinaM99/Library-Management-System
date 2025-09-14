@@ -1,6 +1,7 @@
 // src/server.js
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 require('dotenv').config();
@@ -25,6 +26,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser()); // Add cookie parser middleware
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

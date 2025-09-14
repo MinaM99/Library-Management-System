@@ -6,31 +6,15 @@ export const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Essential: Send cookies with requests
 });
 
-// Add request interceptor for authentication
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('__clerk_db_jwt');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for error handling
+// Optional: Add response interceptor for global error handling
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized access (e.g., redirect to login)
-      localStorage.removeItem('__clerk_db_jwt');
-      window.location.href = '/login';
-    }
+    // Log errors or handle global error states if needed
+    console.error('API Error:', error.response?.data?.message || error.message);
     return Promise.reject(error);
   }
 );

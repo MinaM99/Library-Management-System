@@ -35,9 +35,22 @@ class AuthController {
                 expiresIn: '24h'
             });
 
+            // Set HTTP-only cookie
+            res.cookie('auth-token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                path: '/'
+            });
+
             res.status(201).json({
                 message: 'User registered successfully',
-                token
+                user: {
+                    id: userId,
+                    email,
+                    role
+                }
             });
         } catch (error) {
             res.status(500).json({ message: 'Error registering user' });
@@ -76,13 +89,68 @@ class AuthController {
                 expiresIn: '24h'
             });
 
+            // Set HTTP-only cookie
+            res.cookie('auth-token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                path: '/'
+            });
+
             res.json({
                 message: 'Logged in successfully',
-                token
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role
+                }
             });
         }  catch (error) {
-            console.error('Authentication error:', error);
-            res.status(401).json({ message: 'Invalid or expired token' });
+            console.error('Login error:', error);
+            res.status(500).json({ message: 'Error during login' });
+        }
+    }
+
+    // Logout user
+    static async logout(req, res) {
+        try {
+            // Clear the auth cookie
+            res.clearCookie('auth-token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/'
+            });
+
+            res.json({
+                message: 'Logged out successfully'
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+            res.status(500).json({ message: 'Error during logout' });
+        }
+    }
+
+    // Get current user information
+    static async getCurrentUser(req, res) {
+        try {
+            // req.user comes from auth middleware after token verification
+            const user = await User.findById(req.user.id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.json({
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role
+                }
+            });
+        } catch (error) {
+            console.error('Get current user error:', error);
+            res.status(500).json({ message: 'Error fetching user information' });
         }
     }
 

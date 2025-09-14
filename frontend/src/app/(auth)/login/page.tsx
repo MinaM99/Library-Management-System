@@ -24,25 +24,36 @@ export default function LoginPage() {
   });
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { status, error, token } = useAppSelector((state) => state.auth);
+  const { status, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
     // If already authenticated, redirect to dashboard
-    if (token && status === 'succeeded') {
+    if (isAuthenticated && status === 'succeeded') {
       router.replace('/');
     }
-  }, [token, status, router]);
+  }, [isAuthenticated, status, router]);
 
-  // Debug logging to track state changes
+  // Set local error when auth error occurs, but don't auto-clear
   useEffect(() => {
-    console.log('Auth state:', { status, error: !!error, token: !!token });
-  }, [status, error, token]);
+    if (error) {
+      setLocalError(error);
+    }
+    // Only clear localError if error is cleared externally
+    if (!error && localError) {
+      setLocalError(null);
+    }
+  }, [error, localError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Don't clear error when typing - let user see the error message
-    // Error will be cleared only on new form submission
+    // Clear error when user starts typing new values
+    if (localError) {
+      setLocalError(null);
+      dispatch(clearError());
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -66,6 +77,7 @@ export default function LoginPage() {
   };
 
   const dismissError = () => {
+    setLocalError(null);
     dispatch(clearError());
   };
 
@@ -134,25 +146,25 @@ export default function LoginPage() {
 
           <div 
             className={`transition-all duration-500 ease-in-out ${
-              error ? 'opacity-100 translate-y-0 max-h-32' : 'opacity-0 -translate-y-4 max-h-0'
+              localError ? 'opacity-100 translate-y-0 max-h-32' : 'opacity-0 -translate-y-4 max-h-0'
             } overflow-hidden mb-4`}
           >
-            {error && (
-              <div className="w-full p-4 rounded-lg bg-red-50 border border-red-200 border-l-4 border-l-red-500 flex items-start space-x-3 shadow-sm">
-                <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+            {localError && (
+              <div className="w-full p-4 rounded-lg bg-red-200 border border-red-500 border-l-8 border-l-red-700 flex items-start space-x-3 shadow-lg animate-pulse">
+                <svg className="h-6 w-6 text-red-700 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
                 <div className="flex-1">
-                  <p className="text-red-800 font-medium text-sm">{error}</p>
-                  <p className="text-red-600 text-xs mt-1">Please check your credentials and try again.</p>
+                  <p className="text-red-900 font-bold text-base">{localError}</p>
+                  <p className="text-red-700 text-xs mt-1 font-semibold">Please check your credentials and try again.</p>
                 </div>
                 <button
                   type="button"
                   onClick={dismissError}
-                  className="text-red-400 hover:text-red-600 focus:outline-none focus:text-red-600 transition-colors duration-200"
+                  className="text-red-600 hover:text-red-900 focus:outline-none focus:text-red-900 transition-colors duration-200"
                   aria-label="Dismiss error"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
