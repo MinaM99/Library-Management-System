@@ -85,6 +85,39 @@ class AuthController {
             res.status(401).json({ message: 'Invalid or expired token' });
         }
     }
+
+    // Delete user
+    static async deleteUser(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Check if user exists
+            const user = await User.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            const deleted = await User.deleteById(id);
+            if (!deleted) {
+                return res.status(500).json({ message: 'Failed to delete user' });
+            }
+
+            res.json({ message: 'User deleted successfully' });
+        } catch (error) {
+            console.error('Delete user error:', error);
+            res.status(500).json({ message: 'Error deleting user' });
+        }
+    }
+
+    // Get all users (admin only)
+    static async getAllUsers(req, res) {
+        try {
+            const users = await User.getAllUsers();
+            res.json(users);
+        } catch (error) {
+            console.error('Get users error:', error);
+            res.status(500).json({ message: 'Error fetching users' });
+        }
+    }
 }
 
 module.exports = AuthController;

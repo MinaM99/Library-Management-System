@@ -20,6 +20,16 @@ class User {
         const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
         return rows[0];
     }
+
+    static async deleteById(id) {
+        const [result] = await db.query('DELETE FROM users WHERE id = ?', [id]);
+        return result.affectedRows > 0;
+    }
+
+    static async getAllUsers() {
+        const [rows] = await db.query('SELECT id, email, role, created_at FROM users');
+        return rows;
+    }
 }
 
 module.exports = User;

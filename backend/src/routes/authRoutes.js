@@ -112,4 +112,79 @@ router.post('/register', rateLimiter, AuthController.register);
  */
 router.post('/login', rateLimiter, AuthController.login);
 
+/**
+ * @swagger
+ * /api/auth/users:
+ *   get:
+ *     summary: Get all users (Admin only)
+ *     tags: [Auth]
+ *     security:
+ *       - basicAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   email:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Access denied - Admin privileges required
+ */
+router.get('/users', AuthController.getAllUsers);
+
+/**
+ * @swagger
+ * /api/auth/users/{id}:
+ *   delete:
+ *     summary: Delete a user
+ *     tags: [Auth]
+ *     security:
+ *       - basicAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID to delete
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
+ *       400:
+ *         description: Cannot delete the last admin user
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Access denied - You can only delete your own account
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to delete user
+ */
+router.delete('/users/:id', AuthController.deleteUser);
+
 module.exports = router;

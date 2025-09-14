@@ -36,7 +36,7 @@ docker-compose up --build
 - **Borrowers Management**: Manage library member information
 - **Borrowing System**: Track book checkouts and returns
 - **Analytics Dashboard**: View borrowing statistics and trends
-- **Authentication**: Secure login system
+- **Authentication**: Secure JWT-based login system 
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## 🛠️ Technology Stack
@@ -126,8 +126,11 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ## 📊 API Endpoints
 
 ### Authentication
+- `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
+- `GET /api/auth/profile` - Get current user profile
+- `GET /api/auth/users` - Get all users 
+- `DELETE /api/auth/users/:id` - Delete a user
 
 ### Books
 - `GET /api/books` - Get all books

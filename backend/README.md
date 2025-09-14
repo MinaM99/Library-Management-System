@@ -125,6 +125,8 @@ The application will be available at `http://localhost:3000`
 |--------|----------|-------------|---------------|
 | `POST` | `/api/auth/register` | Register a new user | ❌ |
 | `POST` | `/api/auth/login` | Login user and get JWT token | ❌ |
+| `GET` | `/api/auth/users` | Get all users | ❌ |
+| `DELETE` | `/api/auth/users/:id` | Delete a user | ❌ |
 
 #### 📚 Books Management
 | Method | Endpoint | Description | Auth Required |
@@ -216,7 +218,6 @@ curl -X POST http://localhost:3000/api/borrowings/checkout \
   -H "Content-Type: application/json" \
   -d '{"book_id": 1, "borrower_id": 1}'
 ```
-
 #### 📄 Response Examples
 
 **Successful Login Response:**
