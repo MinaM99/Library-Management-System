@@ -36,7 +36,8 @@ docker-compose up --build
 - **Borrowers Management**: Manage library member information
 - **Borrowing System**: Track book checkouts and returns
 - **Analytics Dashboard**: View borrowing statistics and trends
-- **Authentication**: Secure JWT-based login system 
+- **Secure Authentication**: HTTP-only cookie-based JWT authentication system
+- **Enhanced Security**: XSS protection with HTTP-only cookies, CSRF protection
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## 🛠️ Technology Stack
@@ -53,9 +54,10 @@ docker-compose up --build
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **MySQL** - Database
-- **JWT** - Authentication
+- **JWT** - Authentication tokens
+- **HTTP-only Cookies** - Secure token storage
 - **Swagger** - API documentation
-- **CORS** - Cross-origin resource sharing
+- **CORS** - Cross-origin resource sharing with credentials support
 
 ### DevOps
 - **Docker** - Containerization
@@ -127,7 +129,9 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
 
 ### Authentication
 - `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
+- `POST /api/auth/login` - User login (sets HTTP-only cookie)
+- `POST /api/auth/logout` - User logout (clears authentication cookie)
+- `GET /api/auth/me` - Get current authenticated user
 - `GET /api/auth/profile` - Get current user profile
 - `GET /api/auth/users` - Get all users 
 - `DELETE /api/auth/users/:id` - Delete a user
@@ -151,6 +155,43 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
 
 ### Analytics
 - `GET /api/analytics` - Get borrowing analytics
+
+## 🔐 Authentication & Security
+
+### HTTP-only Cookie Authentication
+
+The application uses HTTP-only cookies for secure authentication, providing enhanced security compared to localStorage-based token storage.
+
+#### Security Features
+- **HTTP-only Cookies**: Tokens stored in HTTP-only cookies, inaccessible to JavaScript
+- **XSS Protection**: Client-side scripts cannot access authentication tokens
+- **CSRF Protection**: SameSite cookie attribute prevents cross-site request forgery
+- **Automatic Expiration**: Cookies expire after 24 hours for security
+- **Secure Transmission**: Cookies only sent over HTTPS in production
+
+#### Authentication Flow
+1. **Login**: User submits credentials → Server validates → Sets HTTP-only cookie
+2. **Requests**: Browser automatically sends cookie with each request
+3. **Validation**: Server validates cookie on protected routes
+4. **Logout**: Server clears the authentication cookie
+
+#### Cookie Configuration
+```javascript
+// Backend cookie settings
+res.cookie('auth-token', token, {
+  httpOnly: true,                              // Prevent XSS
+  secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+  sameSite: 'strict',                         // CSRF protection
+  maxAge: 24 * 60 * 60 * 1000,               // 24 hours
+  path: '/'                                   // Available site-wide
+});
+```
+
+#### Frontend Integration
+- **Automatic Cookie Handling**: Axios configured with `withCredentials: true`
+- **No Token Management**: No localStorage or manual token handling required
+- **Session Persistence**: Authentication persists across browser sessions
+- **Automatic Logout**: Cookies expire automatically for security
 
 ## 🚨 Troubleshooting
 
@@ -178,10 +219,16 @@ docker-compose up --build
 - Verify environment variables in `.env.local`
 - Clear browser cache
 
-**4. API Calls Failing:**
-- Verify CORS configuration in backend
+**4. Authentication Issues:**
+- Verify cookies are being sent with requests (`withCredentials: true`)
+- Check CORS configuration allows credentials
+- Confirm JWT_SECRET is set in environment variables
+- Ensure cookie-parser middleware is installed and configured
+
+**5. API Calls Failing:**
+- Verify CORS configuration in backend allows credentials
 - Check network connectivity between containers
-- Confirm JWT token is valid
+- Confirm authentication cookie is valid and not expired
 
 ## 🔄 Development Workflow
 

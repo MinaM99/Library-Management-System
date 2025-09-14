@@ -28,8 +28,14 @@ A comprehensive Library Management System built with Node.js and MySQL. Manage b
 - Overdue books report generation
 - Monthly borrowing statistics
 
-🛡️ **Technical Features**
-- JWT & Basic Authentication
+🛡️ **Security Features**
+- HTTP-only Cookie Authentication (Enhanced Security)
+- JWT Token-based Authentication
+- Basic Authentication Support
+- XSS Protection via HTTP-only cookies
+- CSRF Protection with SameSite cookies
+- Rate Limiting on Critical Endpoints
+- Secure Cookie Configuration
 - API Documentation with Swagger
 
 ## Getting Started
@@ -178,10 +184,30 @@ The application will be available at `http://localhost:3000`
 - `endDate` - End date (YYYY-MM-DD format)
 
 #### 🔑 Authentication
-- **Basic Auth**: Use username/password in Authorization header
-- **JWT Bearer Token**: Include `Authorization: Bearer <token>` header
-- Get JWT token from `/api/auth/login` endpoint
-- All endpoints except authentication require authentication
+
+**Authentication Methods:**
+1. **HTTP-only Cookies** (Recommended): Secure cookie-based authentication
+2. **JWT Bearer Token**: Include `Authorization: Bearer <token>` header  
+3. **Basic Auth**: Use username/password in Authorization header
+
+**HTTP-only Cookie Authentication:**
+- Login endpoint sets secure HTTP-only cookie
+- Cookie automatically sent with subsequent requests
+- Enhanced security against XSS attacks
+- CSRF protection with SameSite attribute
+- No manual token management required
+
+**Authentication Endpoints:**
+- `POST /api/auth/login` - Login and set HTTP-only cookie
+- `POST /api/auth/logout` - Clear authentication cookie
+- `GET /api/auth/me` - Get current authenticated user
+
+**Security Features:**
+- HTTP-only cookies prevent JavaScript access
+- SameSite='strict' prevents CSRF attacks
+- Secure flag ensures HTTPS-only transmission in production
+- Automatic 24-hour expiration
+- Cookie-parser middleware for secure cookie handling
 
 #### ⚡ Rate Limiting
 The following endpoints have rate limiting enabled:
@@ -289,6 +315,35 @@ curl -X POST http://localhost:3000/api/borrowings/checkout \
   npm test
   ```
 - Example test file: `tests/book.test.js`
+
+## 🔄 Authentication Migration
+
+### Recent Changes: localStorage → HTTP-only Cookies
+
+The authentication system has been upgraded from localStorage-based token storage to HTTP-only cookies for enhanced security.
+
+#### What Changed
+1. **Backend Changes:**
+   - Added `cookie-parser` middleware
+   - Login endpoint now sets HTTP-only cookies instead of returning tokens
+   - Added `/logout` endpoint to clear authentication cookies  
+   - Added `/me` endpoint for current user validation
+   - Updated auth middleware to support both cookies and Bearer tokens
+
+2. **Frontend Changes:**
+   - Updated Redux auth slice to work with server-side validation
+   - Simplified AuthMiddleware without hydration complexity
+   - Axios configured with `withCredentials: true` for automatic cookie handling
+
+#### Migration Benefits
+- **Enhanced Security**: Tokens inaccessible to JavaScript (XSS protection)
+- **CSRF Protection**: SameSite cookie attribute
+- **Simplified Frontend**: No manual token management required
+- **Better UX**: Persistent authentication across browser sessions
+- **Automatic Cleanup**: Cookies expire automatically
+
+#### Backward Compatibility
+The system maintains backward compatibility with Bearer token authentication for API clients that cannot use cookies.
 
 ## Security Features
 
