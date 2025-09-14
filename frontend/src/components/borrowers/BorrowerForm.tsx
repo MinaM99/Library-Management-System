@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/store';
 import { Borrower } from '@/types/borrower';
 import { addBorrower, updateBorrower } from '@/lib/redux/slices/borrowersSlice';
+import { useBorrowerFormValidation } from '@/hooks/useBorrowerFormValidation';
+import { BorrowerFormData } from '@/utils/borrowerValidation';
 
 interface BorrowerFormProps {
   borrower?: Borrower | null;
@@ -11,25 +13,46 @@ interface BorrowerFormProps {
 }
 
 export default function BorrowerForm({ borrower, onClose }: BorrowerFormProps) {
-  const [formData, setFormData] = useState<Omit<Borrower, 'id' | 'registered_date'>>({
-    name: '',
-    email: '',
-  });
-
   const dispatch = useAppDispatch();
   const { status, error } = useAppSelector((state) => state.borrowers);
 
+  // Initialize form data
+  const initialData: BorrowerFormData = {
+    name: borrower?.name || '',
+    email: borrower?.email || '',
+  };
+
+  // Use validation hook
+  const {
+    formData,
+    validationErrors,
+    touched,
+    hasErrors,
+    updateField,
+    touchField,
+    validateForm,
+    setFormData,
+  } = useBorrowerFormValidation(initialData);
+
+  // Update form data when borrower prop changes
   useEffect(() => {
     if (borrower) {
-      setFormData({
+      const updatedData: BorrowerFormData = {
         name: borrower.name,
         email: borrower.email,
-      });
+      };
+      setFormData(updatedData);
     }
-  }, [borrower]);
+  }, [borrower, setFormData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
       if (borrower) {
         // Editing existing borrower
@@ -80,11 +103,19 @@ export default function BorrowerForm({ borrower, onClose }: BorrowerFormProps) {
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                onChange={(e) => updateField('name', e.target.value)}
+                onBlur={() => touchField('name')}
+                placeholder="Enter full name"
+                maxLength={100}
+                className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 sm:text-sm ${
+                  validationErrors.name
+                    ? 'border-red-300 focus:border-red-500'
+                    : 'border-gray-300 focus:border-indigo-500'
+                }`}
               />
+              {touched.name && validationErrors.name && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+              )}
             </div>
 
             <div>
@@ -95,11 +126,19 @@ export default function BorrowerForm({ borrower, onClose }: BorrowerFormProps) {
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                onChange={(e) => updateField('email', e.target.value)}
+                onBlur={() => touchField('email')}
+                placeholder="Enter email address"
+                maxLength={254}
+                className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 sm:text-sm ${
+                  validationErrors.email
+                    ? 'border-red-300 focus:border-red-500'
+                    : 'border-gray-300 focus:border-indigo-500'
+                }`}
               />
+              {touched.email && validationErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+              )}
             </div>
 
             <div className="mt-5 flex justify-end gap-2">
@@ -112,9 +151,9 @@ export default function BorrowerForm({ borrower, onClose }: BorrowerFormProps) {
               </button>
               <button
                 type="submit"
-                disabled={status === 'loading'}
+                disabled={status === 'loading' || hasErrors}
                 className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md ${
-                  status === 'loading'
+                  status === 'loading' || hasErrors
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-indigo-600 hover:bg-indigo-700'
                 }`}
