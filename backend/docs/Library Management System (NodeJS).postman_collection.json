@@ -85,6 +85,215 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"// Check if the token exists in the response\r",
+									"pm.test(\"Token exists\", function () {\r",
+									"    pm.expect(response.token).to.exist;\r",
+									"});\r",
+									"\r",
+									"// Set the token to a global variable for use in subsequent requests\r",
+									"pm.globals.set(\"authToken\", response.token);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mina@email.com\",\r\n  \"password\": \"mina\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/auth/login",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"// Check if the token exists in the response\r",
+									"pm.test(\"Token exists\", function () {\r",
+									"    pm.expect(response.token).to.exist;\r",
+									"});\r",
+									"\r",
+									"// Set the token to a global variable for use in subsequent requests\r",
+									"pm.globals.set(\"authToken\", response.token);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mina@email.com\",\r\n  \"password\": \"mina\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/auth/users",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"// Check if the token exists in the response\r",
+									"pm.test(\"Token exists\", function () {\r",
+									"    pm.expect(response.token).to.exist;\r",
+									"});\r",
+									"\r",
+									"// Set the token to a global variable for use in subsequent requests\r",
+									"pm.globals.set(\"authToken\", response.token);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mina@email.com\",\r\n  \"password\": \"mina\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/auth/users",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"// Check if the token exists in the response\r",
+									"pm.test(\"Token exists\", function () {\r",
+									"    pm.expect(response.token).to.exist;\r",
+									"});\r",
+									"\r",
+									"// Set the token to a global variable for use in subsequent requests\r",
+									"pm.globals.set(\"authToken\", response.token);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mina@email.com\",\r\n  \"password\": \"mina\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/auth/users/:id",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -134,7 +343,7 @@
 					"response": []
 				},
 				{
-					"name": "Add Book using Token",
+					"name": "Add Book using HTTP-Only Cookie",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -389,7 +598,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "6"
 								}
 							]
 						}
@@ -665,7 +874,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"book_id\": 1,\r\n  \"borrower_id\": 1,\r\n  \"due_date\": \"2025-12-31\"\r\n}\r\n",
+							"raw": "{\r\n  \"book_id\": 8,\r\n  \"borrower_id\": 3,\r\n  \"due_date\": \"2025-12-31\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
